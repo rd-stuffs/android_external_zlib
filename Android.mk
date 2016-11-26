@@ -96,3 +96,19 @@ LOCAL_MODULE:= minigzip
 LOCAL_STATIC_LIBRARIES := libz
 
 include $(BUILD_HOST_EXECUTABLE)
+
+#wschen
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=        \
+	src/test/minigzip.c
+
+LOCAL_MODULE:= gzip_static
+
+LOCAL_STATIC_LIBRARIES := libz libc libcutils
+LOCAL_FORCE_STATIC_EXECUTABLE := true
+LOCAL_MODULE_TAGS := optional
+include $(BUILD_EXECUTABLE)
+
+droidcore: gzip_static
+
