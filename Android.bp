@@ -31,6 +31,7 @@ cflags_arm = [
     // Testing with zlib_bench shows -O3 is a win for ARM but a bit of a wash
     // for x86, so match the BUILD file in only enabling this for ARM.
     "-O3",
+    "-funroll-loops",
     // We need a non-NEON libz.a for the NDK, and cpu_features.c won't build
     // without this.
     "-DCPU_NO_SIMD",
