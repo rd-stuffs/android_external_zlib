@@ -161,14 +161,6 @@ cc_library {
             enabled: true,
         },
     },
-
-    stubs: {
-        versions: [
-            "29",
-            "30",
-        ],
-        symbol_file: "libz.map.txt",
-    },
 }
 
 // A more stable build of libz. Build configuration of this library should be
