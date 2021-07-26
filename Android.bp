@@ -132,6 +132,7 @@ cflags_common = [
     "-O3",
     "-DNDEBUG",
     "-fno-semantic-interposition",
+    "-funroll-loops",
 ]
 
 cc_defaults {
