@@ -21,6 +21,39 @@
   DYNAMIC_CRC_TABLE and MAKECRCH can be #defined to write out crc32.h.
  */
 
+#ifdef __aarch64__
+
+#include <arm_neon.h>
+#include <arm_acle.h>
+#include <stdint.h>
+#include <stddef.h>
+
+uint32_t crc32(uint32_t crc, uint8_t *buf, size_t len) {
+    crc = ~crc;
+
+    while (len >= 8) {
+        crc = __crc32d(crc, *(uint64_t*)buf);
+        len -= 8;
+        buf += 8;
+    }
+
+    if (len & 4) {
+        crc = __crc32w(crc, *(uint32_t*)buf);
+        buf += 4;
+    }
+    if (len & 2) {
+        crc = __crc32h(crc, *(uint16_t*)buf);
+        buf += 2;
+    }
+    if (len & 1) {
+        crc = __crc32b(crc, *buf);
+    }
+
+    return ~crc;
+}
+
+#else
+
 #ifdef MAKECRCH
 #  include <stdio.h>
 #  ifndef DYNAMIC_CRC_TABLE
@@ -423,3 +456,5 @@ uLong ZEXPORT crc32_combine64(crc1, crc2, len2)
 {
     return crc32_combine_(crc1, crc2, len2);
 }
+
+#endif
