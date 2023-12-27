@@ -140,7 +140,15 @@ cc_defaults {
     cflags: cflags_common,
     stl: "none",
     export_include_dirs: ["."],
-    srcs: libz_srcs,
+
+    host_supported: true,
+    native_bridge_supported: true,
+
+    vendor_available: true,
+    product_available: true,
+    ramdisk_available: true,
+    vendor_ramdisk_available: true,
+    recovery_available: true,
 
     arch: {
         arm: {
@@ -150,21 +158,21 @@ cc_defaults {
             ldflags: ["-Wl,--hash-style=both"],
 
             cflags: cflags_arm,
-            srcs: srcs_arm,
         },
         arm64: {
             cflags: cflags_arm + cflags_arm64,
-            srcs: srcs_arm,
         },
         x86_64: {
             cflags: cflags_x86,
-            srcs: srcs_x86,
         }
     },
     target: {
         android_x86: {
             cflags: cflags_x86,
             srcs: srcs_x86,
+        },
+        windows: {
+            enabled: true,
         },
     },
 
@@ -178,28 +186,14 @@ cc_library {
     name: "libz",
     defaults: ["libz_defaults"],
 
-    host_supported: true,
+    whole_static_libs: ["libz_static"],
+
     unique_host_soname: true,
     static_ndk_lib: true,
 
-    vendor_available: true,
-    product_available: true,
     vndk: {
         enabled: true,
         support_system_process: true,
-    },
-    ramdisk_available: true,
-    vendor_ramdisk_available: true,
-    recovery_available: true,
-    native_bridge_supported: true,
-
-    target: {
-        linux_bionic: {
-            enabled: true,
-        },
-        windows: {
-            enabled: true,
-        },
     },
 
     stubs: {
@@ -209,6 +203,32 @@ cc_library {
         ],
         symbol_file: "libz.map.txt",
     },
+}
+
+cc_library {
+    name: "libz_static",
+    defaults: ["libz_defaults"],
+    visibility: ["//external/angle"],
+    srcs: libz_srcs,
+
+    arch: {
+        arm: {
+            srcs: srcs_arm,
+        },
+        arm64: {
+            srcs: srcs_arm,
+        },
+        x86_64: {
+            srcs: srcs_x86,
+        }
+    },
+
+    sdk_version: "minimum",
+
+    apex_available: [
+        "com.android.runtime",
+        "//apex_available:platform",
+    ],
 }
 
 // A more stable build of libz. Build configuration of this library should be
@@ -252,6 +272,23 @@ cc_binary {
     },
 }
 
+cc_library {
+    name: "zlib_google_compression_utils_portable",
+    defaults: ["libz_defaults"],
+    srcs: [
+        "google/compression_utils_portable.cc",
+    ],
+    export_include_dirs: ["google"],
+    host_supported: true,
+    shared_libs: ["libz"],
+    sdk_version: "minimum",
+    visibility: ["//external/angle"],
+    apex_available: [
+        "com.android.runtime",
+        "//apex_available:platform",
+    ],
+}
+
 ndk_headers {
     name: "libz_headers",
     from: "",
@@ -269,4 +306,31 @@ ndk_library {
     symbol_file: "libz.map.txt",
     first_version: "9",
     unversioned_until: "current",
+}
+
+// Export zlib headers for inclusion in the musl sysroot.
+genrule {
+    name: "libc_musl_sysroot_zlib_headers",
+    visibility: ["//external/musl"],
+    srcs: [
+        "LICENSE.md",
+        "zconf.h",
+        "zlib.h",
+    ],
+    out: ["libc_musl_sysroot_zlib_headers.zip"],
+    tools: [
+        "soong_zip",
+        "zip2zip",
+    ],
+    cmd: "$(location soong_zip) -o $(genDir)/sysroot.zip -symlinks=false" +
+        // NOTICE
+        " -j -f $(location LICENSE.md) " +
+        // headers
+        " -j -P include " +
+        "  -f $(location zconf.h) " +
+        "  -f $(location zlib.h) " +
+        " && " +
+        "$(location zip2zip) -i $(genDir)/sysroot.zip -o $(out) " +
+        " include/**/*:include " +
+        " LICENSE.md:NOTICE.zlib",
 }
