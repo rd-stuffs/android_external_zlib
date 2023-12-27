@@ -24,6 +24,8 @@
 #  include "arch/power/power_features.h"
 #elif defined(S390_FEATURES)
 #  include "arch/s390/s390_features.h"
+#elif defined(RISCV_FEATURES)
+#  include "arch/riscv/riscv_features.h"
 #endif
 
 struct cpu_features {
@@ -35,6 +37,8 @@ struct cpu_features {
     struct power_cpu_features power;
 #elif defined(S390_FEATURES)
     struct s390_cpu_features s390;
+#elif defined(RISCV_FEATURES)
+    struct riscv_cpu_features riscv;
 #else
     char empty;
 #endif
@@ -51,6 +55,9 @@ extern uint32_t adler32_neon(uint32_t adler, const uint8_t *buf, size_t len);
 #endif
 #ifdef PPC_VMX
 extern uint32_t adler32_vmx(uint32_t adler, const uint8_t *buf, size_t len);
+#endif
+#ifdef RISCV_RVV
+extern uint32_t adler32_rvv(uint32_t adler, const uint8_t *buf, size_t len);
 #endif
 #ifdef X86_SSSE3
 extern uint32_t adler32_ssse3(uint32_t adler, const uint8_t *buf, size_t len);
@@ -120,6 +127,10 @@ extern uint8_t* chunkmemset_safe_neon(uint8_t *out, unsigned dist, unsigned len,
 extern uint32_t chunksize_power8(void);
 extern uint8_t* chunkmemset_safe_power8(uint8_t *out, unsigned dist, unsigned len, unsigned left);
 #endif
+#ifdef RISCV_RVV
+extern uint32_t chunksize_rvv(void);
+extern uint8_t* chunkmemset_safe_rvv(uint8_t *out, unsigned dist, unsigned len, unsigned left);
+#endif
 
 /* inflate fast loop */
 extern void inflate_fast_c(PREFIX3(stream) *strm, uint32_t start);
@@ -137,6 +148,9 @@ extern void inflate_fast_neon(PREFIX3(stream) *strm, uint32_t start);
 #endif
 #ifdef POWER8_VSX
 extern void inflate_fast_power8(PREFIX3(stream) *strm, uint32_t start);
+#endif
+#ifdef RISCV_RVV
+extern void inflate_fast_rvv(PREFIX3(stream) *strm, uint32_t start);
 #endif
 
 /* CRC32 */
@@ -176,6 +190,9 @@ extern uint32_t compare256_neon(const uint8_t *src0, const uint8_t *src1);
 #ifdef POWER9
 extern uint32_t compare256_power9(const uint8_t *src0, const uint8_t *src1);
 #endif
+#ifdef RISCV_RVV
+extern uint32_t compare256_rvv(const uint8_t *src0, const uint8_t *src1);
+#endif
 
 #ifdef DEFLATE_H_
 /* insert_string */
@@ -209,6 +226,9 @@ extern uint32_t longest_match_neon(deflate_state *const s, Pos cur_match);
 #ifdef POWER9
 extern uint32_t longest_match_power9(deflate_state *const s, Pos cur_match);
 #endif
+#ifdef RISCV_RVV
+extern uint32_t longest_match_rvv(deflate_state *const s, Pos cur_match);
+#endif
 
 /* longest_match_slow */
 extern uint32_t longest_match_slow_c(deflate_state *const s, Pos cur_match);
@@ -231,6 +251,9 @@ extern uint32_t longest_match_slow_neon(deflate_state *const s, Pos cur_match);
 #ifdef POWER9
 extern uint32_t longest_match_slow_power9(deflate_state *const s, Pos cur_match);
 #endif
+#ifdef RISCV_RVV
+extern uint32_t longest_match_slow_rvv(deflate_state *const s, Pos cur_match);
+#endif
 
 /* quick_insert_string */
 extern Pos quick_insert_string_c(deflate_state *const s, const uint32_t str);
@@ -245,7 +268,11 @@ typedef void (*slide_hash_func)(deflate_state *s);
 
 #ifdef X86_SSE2
 extern void slide_hash_sse2(deflate_state *s);
-#elif defined(ARM_NEON)
+#endif
+#if defined(ARM_SIMD)
+extern void slide_hash_armv6(deflate_state *s);
+#endif
+#if defined(ARM_NEON)
 extern void slide_hash_neon(deflate_state *s);
 #endif
 #if defined(PPC_VMX)
@@ -253,6 +280,9 @@ extern void slide_hash_vmx(deflate_state *s);
 #endif
 #if defined(POWER8_VSX)
 extern void slide_hash_power8(deflate_state *s);
+#endif
+#if defined(RISCV_RVV)
+extern void slide_hash_rvv(deflate_state *s);
 #endif
 #ifdef X86_AVX2
 extern void slide_hash_avx2(deflate_state *s);

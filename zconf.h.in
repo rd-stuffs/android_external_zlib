@@ -198,4 +198,6 @@ typedef PTRDIFF_TYPE ptrdiff_t;
 #  endif
 #endif
 
+typedef size_t z_size_t;
+
 #endif /* ZCONF_H */

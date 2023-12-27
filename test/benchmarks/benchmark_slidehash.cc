@@ -68,6 +68,9 @@ public:
 
 BENCHMARK_SLIDEHASH(c, slide_hash_c, 1);
 
+#ifdef ARM_SIMD
+BENCHMARK_SLIDEHASH(armv6, slide_hash_armv6, test_cpu_features.arm.has_simd);
+#endif
 #ifdef ARM_NEON
 BENCHMARK_SLIDEHASH(neon, slide_hash_neon, test_cpu_features.arm.has_neon);
 #endif
@@ -77,7 +80,9 @@ BENCHMARK_SLIDEHASH(power8, slide_hash_power8, test_cpu_features.power.has_arch_
 #ifdef PPC_VMX
 BENCHMARK_SLIDEHASH(vmx, slide_hash_vmx, test_cpu_features.power.has_altivec);
 #endif
-
+#ifdef RISCV_RVV
+BENCHMARK_SLIDEHASH(rvv, slide_hash_rvv, test_cpu_features.riscv.has_rvv);
+#endif
 #ifdef X86_SSE2
 BENCHMARK_SLIDEHASH(sse2, slide_hash_sse2, test_cpu_features.x86.has_sse2);
 #endif

@@ -142,6 +142,15 @@ static void init_functable(void) {
 #endif
 
 
+    // ARM - SIMD
+#ifdef ARM_SIMD
+#  ifndef ARM_NOCHECK_SIMD
+    if (cf.arm.has_simd)
+#  endif
+    {
+        ft.slide_hash = &slide_hash_armv6;
+    }
+#endif
     // ARM - NEON
 #ifdef ARM_NEON
 #  ifndef ARM_NOCHECK_NEON
@@ -198,6 +207,21 @@ static void init_functable(void) {
         ft.compare256 = &compare256_power9;
         ft.longest_match = &longest_match_power9;
         ft.longest_match_slow = &longest_match_slow_power9;
+    }
+#endif
+
+
+    // RISCV - RVV
+#ifdef RISCV_RVV
+    if (cf.riscv.has_rvv) {
+        ft.adler32 = &adler32_rvv;
+        ft.chunkmemset_safe = &chunkmemset_safe_rvv;
+        ft.chunksize = &chunksize_rvv;
+        ft.compare256 = &compare256_rvv;
+        ft.inflate_fast = &inflate_fast_rvv;
+        ft.longest_match = &longest_match_rvv;
+        ft.longest_match_slow = &longest_match_slow_rvv;
+        ft.slide_hash = &slide_hash_rvv;
     }
 #endif
 
