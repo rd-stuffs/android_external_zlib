@@ -6,9 +6,7 @@
  */
 
 #ifdef ARM_ACLE
-#ifndef _MSC_VER
-#  include <arm_acle.h>
-#endif
+#include "acle_intrins.h"
 #include "../../zbuild.h"
 #include "../../deflate.h"
 

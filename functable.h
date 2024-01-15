@@ -11,6 +11,7 @@
 #include "adler32_fold.h"
 
 struct functable_s {
+    void     (* force_init)         (void);
     uint32_t (* adler32)            (uint32_t adler, const uint8_t *buf, size_t len);
     uint32_t (* adler32_fold_copy)  (uint32_t adler, uint8_t *dst, const uint8_t *src, size_t len);
     uint8_t* (* chunkmemset_safe)   (uint8_t *out, unsigned dist, unsigned len, unsigned left);
@@ -30,6 +31,6 @@ struct functable_s {
     uint32_t (* update_hash)        (deflate_state *const s, uint32_t h, uint32_t val);
 };
 
-Z_INTERNAL extern Z_TLS struct functable_s functable;
+Z_INTERNAL extern struct functable_s functable;
 
 #endif
